@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "tv-7-dana-unazad"
+version = "0.1.0"
+description = "Tv program za prethodnih sedam dana."
+authors = ["Bojan Sejnjanovic <bojan.sejnjanovic@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.32.3"
+bs4 = "^0.0.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
