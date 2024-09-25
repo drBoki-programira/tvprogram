@@ -1,11 +1,12 @@
 from datetime import datetime, date, timedelta
+from enum import Enum
 from typing import Generator
 
 import bs4
 import requests
 
-from config import DAYS, START_URL
-from items import Record
+from config import START_URL
+from items import Record, Days
 
 
 class TvCrawler:
@@ -15,20 +16,20 @@ class TvCrawler:
     def __init__(
             self, channels: list[str],
             start_url: str = START_URL,
-            date_offsets: dict[str] = DAYS
+            days: Enum = Days
                                       ) -> None:
         """Initilizes class with channel names to scrape."""
         self.start_url = start_url
         self.channels = channels
-        self.date_offsets = date_offsets
+        self.days = days
         self.date = date.today()
         self.records = {channel: [] for channel in self.channels}
 
     def run(self) -> Generator[str, str, timedelta]:
         """Runs the crawler and generates response pages"""
         for url in self._list_urls():
-            table_name, date_offset = url.split('/')[-2:]
-            ofsset = self.date_offsets[date_offset]
+            table_name, day_name = url.split('/')[-2:]
+            ofsset = self.days[day_name.upper()].value
             yield self._get_page(url), table_name, ofsset
 
     def _get_page(self, url: str) -> str:
@@ -43,13 +44,13 @@ class TvCrawler:
 
     def _list_urls(self) -> list[str]:
         """Produces a list of urls to scrape from."""
-        return [f'{self.start_url}{channel}/{offset}'
+        return [f'{self.start_url}{channel}/{day}'
                 for channel in self.channels
-                for offset in self.date_offsets.keys()]
+                for day in [day.name.lower() for day in Days]]
 
     def get_records(self, response: requests.Response,
                     table_name: str,
-                    offset: timedelta | None) -> dict[str, Record]:
+                    offset: timedelta) -> dict[str, Record]:
         """
         Parses the response page and fills dictionary with scraped records.
         """
@@ -58,9 +59,7 @@ class TvCrawler:
 
         for element in all_elements:
             time, tag, title, descr = self._extract_fields(element)
-
-            if offset:
-                time += offset
+            time += offset
             if self.records[table_name] and self.records[table_name][-1].time > time:  # noqa: E501
                 time += timedelta(days=1)
 
