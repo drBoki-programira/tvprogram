@@ -1,6 +1,5 @@
 from scrape import TvCrawler
-from dbmanager import (make_connection, execute_sql,
-                       make_create_sql, make_insert_sql)
+from dbmanager import (make_connection, make_create_sql, make_insert_sql)
 from config import CHANNELS, DB_NAME
 
 
@@ -8,14 +7,16 @@ def main():
     crawler = TvCrawler(CHANNELS)
     connection = make_connection(DB_NAME)
 
-    for response, table_name, offset in crawler.run():
-        crawler.get_records(response, table_name, offset)
+    for response, channel, offset in crawler.run():
+        crawler.get_records(response, channel, offset)
 
-    for table_name in crawler.channels:
+    for channel in crawler.channels:
+        table_name = channel.replace('-', '_').capitalize()
         create_sql = make_create_sql(table_name)
-        execute_sql(connection, create_sql)
-        insert_sql = make_insert_sql(table_name, crawler.records[table_name])
-        execute_sql(connection, insert_sql)
+        connection.execute(create_sql)
+        insert_sql = make_insert_sql(table_name, crawler.records[channel])
+        connection.execute(insert_sql)
+        connection.commit()
 
     print('Done.')
 

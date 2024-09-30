@@ -28,9 +28,9 @@ class TvCrawler:
     def run(self) -> Generator[str, str, timedelta]:
         """Runs the crawler and generates response pages"""
         for url in self._list_urls():
-            table_name, day_name = url.split('/')[-2:]
+            channel, day_name = url.split('/')[-2:]
             ofsset = self.days[day_name.upper()].value
-            yield self._get_page(url), table_name, ofsset
+            yield self._get_page(url), channel, ofsset
 
     def _get_page(self, url: str) -> str:
         """Downloads the page for the given url."""
@@ -80,12 +80,12 @@ class TvCrawler:
     def _extract_fields(self,
                         element: bs4.element.Tag) -> tuple[str, datetime]:
         """Extracts fields for the records."""
-        try:
-            tag = element.select_one('div.category').getText()
-        except AttributeError:
+        if tag_element := element.select_one('div.category'):
+            tag = tag_element.getText()
+        else:
             tag = ''
         time_str = element.select_one('div.time').getText()
         time = self._fmt_time(time_str)
-        title = element.select_one('div.title').getText()
-        descr = element.select_one('div.descr').getText()
+        title = element.select_one('div.title').getText().replace('\'', ' ')
+        descr = element.select_one('div.descr').getText().replace('\'', ' ')
         return (time, tag, title, descr)

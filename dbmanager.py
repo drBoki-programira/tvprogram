@@ -10,21 +10,12 @@ def make_connection(db_name: str) -> sqlite3.Connection:
         connection = sqlite3.connect(db_name)
     except Exception as e:
         print('DB connection error: ', e)
+        quit()
     return connection
 
 
-def execute_sql(connection: sqlite3.Connection, sql: str) -> None:
-    """Executes sql command"""
-    try:
-        connection.execute(sql)
-    except sqlite3.IntegrityError:
-        print('Preventing duplicating the rows.')
-    connection.commit()
-    return None
-
-
 def make_create_sql(table_name: str) -> str:
-    fmt_table_name = table_name.replace('-', '')
+    """Creates SQL command for creating tables."""
     return '''
 CREATE TABLE IF NOT EXISTS {0} (
     datetime TEXT PRIMARY KEY,
@@ -32,24 +23,25 @@ CREATE TABLE IF NOT EXISTS {0} (
     title TEXT,
     description TEXT
 );
-'''.format(fmt_table_name)
+'''.format(table_name)
 
 
 def make_insert_sql(table_name: str, records: list[Record]) -> str:
-    fmt_table_name = table_name.replace('-', '')
-    input_str = [f"('{record.time}', '{record.tag}',"
-                 f"'{record.title}', '{record.descr}')"
-                 for record in records]
+    """Creates SQL command for inserting records into the table."""
+    input_list = [f"('{record.time}', '{record.tag}',"
+                  f"'{record.title}', '{record.descr}')"
+                  for record in records]
+    input_str = ','.join(set(input_list))  # get rid of duplicated rows
     return '''
-INSERT INTO
+INSERT OR REPLACE INTO
     {0} (datetime, genre, title, description)
 VALUES
     {1}
-'''.format(fmt_table_name, ','.join(input_str))
+'''.format(table_name, input_str)
 
 
 def make_select_sql(table_name: str) -> str:
-    fmt_table_name = table_name.replace('-', '')
+    """Creates SQL command for selecting all rows in the table."""
     return '''
 SELECT * FROM {0}
-'''.format(fmt_table_name)
+'''.format(table_name)
