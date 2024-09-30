@@ -31,7 +31,7 @@ def make_insert_sql(table_name: str, records: list[Record]) -> str:
     input_list = [f"('{record.time}', '{record.tag}',"
                   f"'{record.title}', '{record.descr}')"
                   for record in records]
-    input_str = ','.join(set(input_list))  # get rid of duplicated rows
+    input_str = ','.join(list(dict.fromkeys(input_list)))  # no duplicates
     return '''
 INSERT OR REPLACE INTO
     {0} (datetime, genre, title, description)

@@ -8,3 +8,4 @@ CHANNELS = ['hbo',
             'cinestar-tv-premiere-2']
 DB_NAME = 'db.sqlite'
 START_URL = 'https://naslovi.net/tv-program/'
+SELECTORS = ['.time', '.category', '.title', '.descr']
