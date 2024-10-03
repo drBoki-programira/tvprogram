@@ -1,2 +1,4 @@
-__pycache__/
+**__pycache__/
 db.sqlite
+test_nb.ipynb
+test_db.sqlite

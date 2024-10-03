@@ -63,6 +63,9 @@ class TvCrawler:
 
         for element in all_elements:
             time, tag, title, descr = self._extract_fields(element)
+            if title == 'No Information':
+                continue
+
             time = self._fmt_time(time, offset)
             if self.records[table_name] and self.records[table_name][-1].time > time:  # noqa: E501
                 time += timedelta(days=1)
