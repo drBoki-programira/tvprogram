@@ -14,17 +14,14 @@ connection = make_connection(DB_NAME)
 table_name = channel.replace('-', '_').capitalize()
 select_sql = make_select_sql(table_name)
 df = pd.read_sql(select_sql, connection, parse_dates='datetime')
+df.sort_values('datetime', inplace=True)
+mask = [(d1 - d2).seconds < 301 for d1, d2 in
+        zip(df.datetime[1:], df.datetime[:-1])] + [False]
+df.drop(df[mask].index, inplace=True)
 
-translate = {'Monday': 'Ponedeljak',
-             'Tuesday': 'Utorak',
-             'Wednesday': 'Sreda',
-             'Thursday': 'Četvrtak',
-             'Friday': 'Petak',
-             'Saturday': 'Subota',
-             'Sunday': 'Nedelja'}
 df['days'] = df.datetime.dt.date
 df['time'] = df.datetime.dt.strftime('%H:%M')
-df['display'] = df.time + ' ' + df.genre.str.rjust(7, ' ') + '  ' + df.title
+df['display'] = df.time + ' ' + df.genre.str.rjust(7, ' ') + '   ' + df.title
 
 start = pd.Timestamp.today() - pd.Timedelta(days=7)
 end = pd.Timestamp.today()
