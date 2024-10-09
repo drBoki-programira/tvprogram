@@ -63,7 +63,7 @@ class TvCrawler:
 
         for element in all_elements:
             time, tag, title, descr = self._extract_fields(element)
-            if title == 'No Information':
+            if title.lower().strip() == 'no information':
                 continue
 
             time = self._fmt_time(time, offset)
