@@ -1,16 +1,17 @@
-import sqlite3
+import psycopg2
 
 from items import Record
 
 
-def make_connection(db_name: str) -> sqlite3.Connection:
-    """Makes connection to the database."""
-    connection = None
-    try:
-        connection = sqlite3.connect(db_name)
-    except Exception as e:
-        print('DB connection error: ', e)
-        quit()
+def make_connection(db_name, db_user, db_password, db_host, db_port):
+    connection = psycopg2.connect(
+        database=db_name,
+        user=db_user,
+        password=db_password,
+        host=db_host,
+        port=db_port,
+    )
+    print('Connection to PostgreSQL DB succesful.')
     return connection
 
 
@@ -18,7 +19,7 @@ def make_create_sql(table_name: str) -> str:
     """Creates SQL command for creating tables."""
     return '''
 CREATE TABLE IF NOT EXISTS {0} (
-    datetime TEXT PRIMARY KEY,
+    datetime TIMESTAMP PRIMARY KEY,
     genre TEXT,
     title TEXT,
     description TEXT
@@ -33,10 +34,12 @@ def make_insert_sql(table_name: str, records: list[Record]) -> str:
                   for record in records]
     input_str = ','.join(list(dict.fromkeys(input_list)))  # no duplicates
     return '''
-INSERT OR REPLACE INTO
+INSERT INTO
     {0} (datetime, genre, title, description)
 VALUES
     {1}
+ON CONFLICT (datetime)
+DO NOTHING
 '''.format(table_name, input_str)
 
 
