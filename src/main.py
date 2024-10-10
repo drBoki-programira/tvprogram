@@ -1,11 +1,23 @@
 from scrape import TvCrawler
 from dbmanager import (make_connection, make_create_sql, make_insert_sql)
-from config import CHANNELS, DB_CONN
+from config import CHANNELS, START_URL, SELECTORS, settings
+from items import Days
 
 
 def main():
-    crawler = TvCrawler(CHANNELS)
-    connection = make_connection(*DB_CONN)
+    crawler = TvCrawler(
+        CHANNELS,
+        START_URL,
+        SELECTORS,
+        Days
+    )
+    connection = make_connection(
+        settings.database,
+        settings.user,
+        settings.password,
+        settings.host,
+        settings.port
+    )
     cursor = connection.cursor()
 
     for response, channel, offset in crawler.run():

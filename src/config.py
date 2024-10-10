@@ -1,12 +1,17 @@
-import toml
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-data = toml.load('.streamlit/secrets.toml')
-DB_CONN = [data['connections']['postgresql']['database'],
-           data['connections']['postgresql']['username'],
-           data['connections']['postgresql']['password'],
-           data['connections']['postgresql']['host'],
-           data['connections']['postgresql']['port']]
+class DBSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file='.env')
+
+    database: str
+    user: str
+    password: str
+    host: str
+    port: int
+
+
+settings = DBSettings()
 
 CHANNELS = ['hbo',
             'hbo-2',

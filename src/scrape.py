@@ -5,8 +5,7 @@ from typing import Generator
 import bs4
 import requests
 
-from config import START_URL, SELECTORS
-from items import Record, Days
+from items import Record
 
 
 class TvCrawler:
@@ -16,9 +15,9 @@ class TvCrawler:
     def __init__(
             self,
             channels: list[str],
-            start_url: str = START_URL,
-            selectors: list[str] = SELECTORS,
-            days: Enum = Days
+            start_url: str,
+            selectors: list[str],
+            days: Enum
     ) -> None:
         """Initilizes class with channel names to scrape."""
         self.start_url = start_url
@@ -48,7 +47,7 @@ class TvCrawler:
         """Produces a list of urls to scrape from."""
         return [f'{self.start_url}{channel}/{day}'
                 for channel in self.channels
-                for day in [day.name.lower() for day in Days]]
+                for day in [day.name.lower() for day in self.days]]
 
     def get_records(self,
                     response: requests.Response,
